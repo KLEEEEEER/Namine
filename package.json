@@ -1,5 +1,28 @@
 {
+  "name": "namine",
+  "version": "1.0.0",
+  "description": "Modification parser for OpenCart. Just write code in dev files with certain comments and get modification file.",
+  "main": "naminejs.js",
   "dependencies": {
-    "fs": "0.0.1-security"
-  }
+    "fs": "^0.0.1-security"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KLEEEEEER/NamineJS.git"
+  },
+  "keywords": [
+    "Opencart",
+    "modification",
+    "parser"
+  ],
+  "author": "kleeeeeer",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/KLEEEEEER/NamineJS/issues"
+  },
+  "homepage": "https://github.com/KLEEEEEER/NamineJS#readme"
 }
