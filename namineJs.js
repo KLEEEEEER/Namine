@@ -27,15 +27,17 @@ var fs = require('fs');
 var path = require('path');
 "use strict";
 // var filt = new RegExp("//-nmn "+extension_name+"((\\s*).*(\\s*))//-nmn", 'gmu');
-var filt = new RegExp('//-nmn '+extension_name+' pos:"(.*)" line:"(.*)"((\\s*).*(\\s*))//-nmn', 'gmu');
-var filt_html = new RegExp('<!--//-nmn '+extension_name+' pos:"(.*)" line:"(.*)"-->((\\s*).*(\\s*))<!--//-nmn-->', 'gmu');
+
+// Старые вроде бы рабочие варианты
+var filt = new RegExp('//-nmn '+extension_name+' pos:"(.*)" line:"(.*)"([\\s\\S]*)//-nmn', 'gmu');
+var filt_html = new RegExp('<!--//-nmn '+extension_name+' pos:"(.*)" line:"(.*)"-->([\\s\\S]*)<!--//-nmn-->', 'gmu');
+
 var write_filename = './modifications/'+extension_name+'.ocmod.xml';
 
 function writeModificationFileStart() {
 	// console.log('writeModificationFileStart');
 	var start_string = `<?xml version="1.0" ?>
-<!DOCTYPE modification [
-	]>
+<!DOCTYPE modification []>
 <modification>
 	<name>`+extension_name+`</name>
 	<version>`+version+`</version>
