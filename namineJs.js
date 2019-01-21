@@ -1,29 +1,37 @@
 exports.makeExtension = function(options) {
 
-	var extension_name = (options.hasOwnProperty('extension_name')) ? options['extension_name'] : 'test';
-	var author = (options.hasOwnProperty('author')) ? options['author'] : 'Author';
-	var link = (options.hasOwnProperty('link')) ? options['link'] : '';
-	var version = (options.hasOwnProperty('version')) ? options['version'] : '0.1';
-	var modification_path = (options.hasOwnProperty('modification_path')) ? options['modification_path'] : './';
+	if (options) {
+		var modification_name = (options.hasOwnProperty('modification_name')) ? options['modification_name'] : 'test';
+		var author = (options.hasOwnProperty('author')) ? options['author'] : 'Author';
+		var link = (options.hasOwnProperty('link')) ? options['link'] : '';
+		var version = (options.hasOwnProperty('version')) ? options['version'] : '0.1';
+		var modification_path = (options.hasOwnProperty('modification_path')) ? options['modification_path'] : './';
+	} else {
+		var modification_name = 'test';
+		var author = 'Author';
+		var link = '';
+		var version = '0.1';
+		var modification_path = './';
+	}
 
 	var fs = require('fs');
 	var path = require('path');
 	"use strict";
 
-	var filt = new RegExp('//-nmn '+extension_name+' pos:"(.*)" line:"(.*)"([\\s\\S]*)//-nmn', 'gmu');
-	var filt_html = new RegExp('<!--//-nmn '+extension_name+' pos:"(.*)" line:"(.*)"-->([\\s\\S]*)<!--//-nmn-->', 'gmu');
+	var filt = new RegExp('//-nmn '+modification_name+' pos:"(.*)" line:"(.*)"([\\s\\S]*)//-nmn', 'gmu');
+	var filt_html = new RegExp('<!--//-nmn '+modification_name+' pos:"(.*)" line:"(.*)"-->([\\s\\S]*)<!--//-nmn-->', 'gmu');
 
-	var write_filename = modification_path + extension_name+'.ocmod.xml';
+	var write_filename = modification_path + modification_name+'.ocmod.xml';
 
 	function writeModificationFileStart() {
 		var start_string = `<?xml version="1.0" ?>
 <!DOCTYPE modification []>
 <modification>
-	<name>`+extension_name+`</name>
+	<name>`+modification_name+`</name>
 	<version>`+version+`</version>
 	<author>`+author+`</author>
 	<link>`+link+`</link>
-	<code>`+extension_name+`</code>`;
+	<code>`+modification_name+`</code>`;
 		fs.writeFileSync(write_filename, start_string, function(err){
 			if (err) throw err;
 		});
