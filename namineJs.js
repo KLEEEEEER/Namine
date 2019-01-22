@@ -1,4 +1,4 @@
-exports.makeExtension = function(options) {
+exports.makeModification = function(options) {
 
 	if (options) {
 		var modification_name = (options.hasOwnProperty('modification_name')) ? options['modification_name'] : 'test';
@@ -56,10 +56,9 @@ exports.makeExtension = function(options) {
 					&& modifications_array[key][3] !== undefined
 				) {
 					data += `	
-	<file path="`+key+`">
+	<file path="`+key.replace(/\\/g, '/').replace(/theme\/(.*)\/template/g, 'theme/*/template')+`">
 		<operation>
-			<search>
-				<![CDATA[`;
+			<search><![CDATA[`;
 					data += modifications_array[key][3];
 					data += `]]></search>
 			<add position="`+modifications_array[key][2]+`"><![CDATA[`;
@@ -78,6 +77,7 @@ exports.makeExtension = function(options) {
 		});
 	}
 
+	// https://stackoverflow.com/questions/25460574/find-files-by-extension-html-under-a-folder-in-nodejs/25462405#25462405
 	function fromDir(startPath, filter, filelist){
 		if (!fs.existsSync(startPath)){
 			console.log("no dir ",startPath);
@@ -102,7 +102,7 @@ exports.makeExtension = function(options) {
 	var file_list_tpl = fromDir('./catalog/','.tpl');
 	var file_list_twig = fromDir('./catalog/','.twig');
 
-	function find_match(list, filter) {
+	function findMatch(list, filter) {
 		for (var i=0; i<list.length; i++) {
 			(function(filename){
 				var contents = fs.readFileSync(filename);
@@ -120,11 +120,8 @@ exports.makeExtension = function(options) {
 	}
 
 	writeModificationFileStart();
-	find_match(file_list_php, filt);
-	find_match(file_list_tpl, filt_html);
-	find_match(file_list_twig, filt_html);
+	findMatch(file_list_php, filt);
+	findMatch(file_list_tpl, filt_html);
+	findMatch(file_list_twig, filt_html);
 	writeModificationFileEnd();
-
 };
-
-
