@@ -17,7 +17,7 @@ Write in your dev code your modifications
 Modification for .php files:
 ```
 ...
-//-nmn MODIFICATION_NAME pos:"POSITION" line:"LINE"
+//-nmn MODIFICATION_NAME pos:"POSITION" line: LINE
 MODIFICATION_TEXT
 //-nmn
 ...
@@ -26,7 +26,7 @@ MODIFICATION_TEXT
 Modification for .tpl and .twig files
 ```
 ...
-<!--//-nmn MODIFICATION_NAME pos:"POSITION" line:"LINE"-->
+<!--//-nmn MODIFICATION_NAME pos:"POSITION" line: LINE-->
 MODIFICATION_TEXT
 <!--//-nmn-->
 ...
@@ -37,7 +37,7 @@ MODIFICATION_TEXT
 * MODIFICATION_TEXT - just your modification
 
 
-## Examples:
+## Example:
 
 ### test.js
 
