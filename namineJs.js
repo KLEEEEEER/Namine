@@ -18,8 +18,8 @@ exports.makeModification = function(options) {
 	var path = require('path');
 	"use strict";
 
-	var filt = new RegExp('//-nmn '+modification_name+' pos:"(.*)" line:"(.*)"([\\s\\S]*?)//-nmn', 'gmu');
-	var filt_html = new RegExp('<!--//-nmn '+modification_name+' pos:"(.*)" line:"(.*)"-->([\\s\\S]*?)<!--//-nmn-->', 'gmu');
+	var filt = new RegExp('//-nmn '+modification_name+' pos:"(.*)" line: (.*)[\r\n|\r|\n]([\\s\\S]*?)//-nmn', 'gmu');
+	var filt_html = new RegExp('<!--//-nmn '+modification_name+' pos:"(.*)" line: (.*)-->([\\s\\S]*?)<!--//-nmn-->', 'gmu');
 
 	var write_filename = modification_path + modification_name+'.ocmod.xml';
 

@@ -37,53 +37,70 @@ MODIFICATION_TEXT
 * MODIFICATION_TEXT - just your modification
 
 
-##Examples:
+## Examples:
 
-test.js
+### test.js
 
 ```
 var namine = require('namine');
 
-namine.makeModification({modification_name:'privet'});
+namine.makeModification({
+	modification_name:'hello',
+	author:'test_author',
+	link:'test.com',
+	version:'0.1',
+});
 ```
 
-catalog/controller/product/product.php
+### catalog/controller/product/product.php
 ```
 ...
-//-nmn test_name pos:"before" line:"if ($product_info) {"
-$data['hello'] = 'Hello';
-$data['hello2'] = 'World!';
-//-nmn
-if ($product_info) {
+//-nmn hello pos:"before" line: $product_info = $this->model_catalog_product->getProduct($product_id);
+		$data['hello1'] = 'hello';
+
+		$data['hello2'] = '???';
+		//-nmn
+		$product_info = $this->model_catalog_product->getProduct($product_id);
 ...
 ```
 
-catalog/view/theme/default/template/product/product.tpl
+### catalog/view/theme/default/template/product/product.tpl
 ```
 ...
 <?php if ($review_status) { ?>
-<!--//-nmn privet pos:"after" line:"<?php if ($review_status) { ?>"-->
+<!--//-nmn hello pos:"after" line: <?php if ($review_status) { ?>-->
 <?php echo $hello . ' ' . $hello2;?>
 <!--//-nmn-->
 ...
 ```
 
-output privet.ocmod.xml
+### output hello.ocmod.xml
 ```
 <?xml version="1.0" ?>
 <!DOCTYPE modification []>
 <modification>
-	<name>privet</name>
+	<name>hello</name>
 	<version>0.1</version>
-	<author>Author</author>
-	<link></link>
-	<code>privet</code>	
+	<author>test_author</author>
+	<link>test.com</link>
+	<code>hello</code>	
+	<file path="catalog/controller/product/product.php">
+		<operation>
+			<search><![CDATA[$product_info = $this->model_catalog_product->getProduct($product_id);]]></search>
+			<add position="before"><![CDATA[
+		$data['hello1'] = 'hello';
+
+		$data['hello2'] = '???';
+		]]></add>
+		</operation>
+	</file>
+	
 	<file path="catalog/view/theme/*/template/product/product.tpl">
 		<operation>
-			<search><![CDATA[<?php if ($review_status) { ?>]]></search>
+			<search><![CDATA[<?php echo $column_left; ?>]]></search>
 			<add position="before"><![CDATA[
-	          ПРИВЕТ
-	          ]]></add>
+	<?php echo $hello1 . $hello2;?>
+	]]></add>
 		</operation>
 	</file>
 
