@@ -18,8 +18,8 @@ exports.makeModification = function(options) {
 	var path = require('path');
 	"use strict";
 
-	var filt = new RegExp('//-nmn '+modification_name+' pos:"(.*)" line:"(.*)"([\\s\\S]*)//-nmn', 'gmu');
-	var filt_html = new RegExp('<!--//-nmn '+modification_name+' pos:"(.*)" line:"(.*)"-->([\\s\\S]*)<!--//-nmn-->', 'gmu');
+	var filt = new RegExp('//-nmn '+modification_name+' pos:"(.*)" line:"(.*)"([\\s\\S]*?)//-nmn', 'gmu');
+	var filt_html = new RegExp('<!--//-nmn '+modification_name+' pos:"(.*)" line:"(.*)"-->([\\s\\S]*?)<!--//-nmn-->', 'gmu');
 
 	var write_filename = modification_path + modification_name+'.ocmod.xml';
 
@@ -62,7 +62,6 @@ exports.makeModification = function(options) {
 					data += modifications_array[key][3];
 					data += `]]></search>
 			<add position="`+modifications_array[key][2]+`"><![CDATA[`;
-					// data += 'Character: ' + modifications_array[key][0] + ' ' + modifications_array[key][1] + '\n';
 					data += modifications_array[key][1];
 					data += `]]></add>
 		</operation>
@@ -98,13 +97,18 @@ exports.makeModification = function(options) {
 		return filelist;
 	}
 
+	// TODO: Refactor
 	var file_list_php = fromDir('./catalog/','.php');
 	var file_list_tpl = fromDir('./catalog/','.tpl');
 	var file_list_twig = fromDir('./catalog/','.twig');
+	var admin_file_list_php = fromDir('./admin/','.php');
+	var admin_file_list_tpl = fromDir('./admin/','.tpl');
+	var admin_file_list_twig = fromDir('./admin/','.twig');
 
 	function findMatch(list, filter) {
 		for (var i=0; i<list.length; i++) {
 			(function(filename){
+				console.log('Searching in ' + filename);
 				var contents = fs.readFileSync(filename);
 				var modifications;
 				var match;
@@ -123,5 +127,8 @@ exports.makeModification = function(options) {
 	findMatch(file_list_php, filt);
 	findMatch(file_list_tpl, filt_html);
 	findMatch(file_list_twig, filt_html);
+	findMatch(admin_file_list_php, filt);
+	findMatch(admin_file_list_tpl, filt_html);
+	findMatch(admin_file_list_twig, filt_html);
 	writeModificationFileEnd();
 };

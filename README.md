@@ -35,3 +35,57 @@ MODIFICATION_TEXT
 * POSITION - position of modification (after, before, replace)
 * LINE - line after, before or replaced of your modification
 * MODIFICATION_TEXT - just your modification
+
+
+##Examples:
+
+test.js
+
+```
+var namine = require('namine');
+
+namine.makeModification({modification_name:'privet'});
+```
+
+catalog/controller/product/product.php
+```
+...
+//-nmn test_name pos:"before" line:"if ($product_info) {"
+$data['hello'] = 'Hello';
+$data['hello2'] = 'World!';
+//-nmn
+if ($product_info) {
+...
+```
+
+catalog/view/theme/default/template/product/product.tpl
+```
+...
+<?php if ($review_status) { ?>
+<!--//-nmn privet pos:"after" line:"<?php if ($review_status) { ?>"-->
+<?php echo $hello . ' ' . $hello2;?>
+<!--//-nmn-->
+...
+```
+
+output privet.ocmod.xml
+```
+<?xml version="1.0" ?>
+<!DOCTYPE modification []>
+<modification>
+	<name>privet</name>
+	<version>0.1</version>
+	<author>Author</author>
+	<link></link>
+	<code>privet</code>	
+	<file path="catalog/view/theme/*/template/product/product.tpl">
+		<operation>
+			<search><![CDATA[<?php if ($review_status) { ?>]]></search>
+			<add position="before"><![CDATA[
+	          ПРИВЕТ
+	          ]]></add>
+		</operation>
+	</file>
+
+</modification>
+```
