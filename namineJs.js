@@ -1,17 +1,19 @@
 exports.makeModification = function(options) {
 
+	var modification_name, author, link, version, modification_path;
+
 	if (options) {
-		var modification_name = (options.hasOwnProperty('modification_name')) ? options['modification_name'] : 'test';
-		var author = (options.hasOwnProperty('author')) ? options['author'] : 'Author';
-		var link = (options.hasOwnProperty('link')) ? options['link'] : '';
-		var version = (options.hasOwnProperty('version')) ? options['version'] : '0.1';
-		var modification_path = (options.hasOwnProperty('modification_path')) ? options['modification_path'] : './';
+		modification_name = (options.hasOwnProperty('modification_name')) ? options['modification_name'] : 'test';
+		author = (options.hasOwnProperty('author')) ? options['author'] : 'Author';
+		link = (options.hasOwnProperty('link')) ? options['link'] : '';
+		version = (options.hasOwnProperty('version')) ? options['version'] : '0.1';
+		modification_path = (options.hasOwnProperty('modification_path')) ? options['modification_path'] : './';
 	} else {
-		var modification_name = 'test';
-		var author = 'Author';
-		var link = '';
-		var version = '0.1';
-		var modification_path = './';
+		modification_name = 'test';
+		author = 'Author';
+		link = '';
+		version = '0.1';
+		modification_path = './';
 	}
 
 	var fs = require('fs');
@@ -48,28 +50,33 @@ exports.makeModification = function(options) {
 	function writeModificationFile(filename, modifications_array) {
 		var data = '';
 
-		for (var key in modifications_array) {
-			if (modifications_array.hasOwnProperty(key)) {
-				if ( modifications_array[key][0] !== undefined
-					&& modifications_array[key][1] !== undefined
-					&& modifications_array[key][2] !== undefined
-					&& modifications_array[key][3] !== undefined
-				) {
-					data += `	
-	<file path="`+key.replace(/\\/g, '/').replace(/theme\/(.*)\/template/g, 'theme/*/template')+`">
-		<operation>
-			<search><![CDATA[`;
-					data += modifications_array[key][3];
-					data += `]]></search>
-			<add position="`+modifications_array[key][2]+`"><![CDATA[`;
-					data += modifications_array[key][1];
-					data += `]]></add>
-		</operation>
-	</file>`;
-					data+='\n';
+		data+='\n';
+		data += `		<file path="`+filename.replace(/\\/g, '/').replace(/theme\/(.*)\/template/g, 'theme/*/template')+`">`;
+		for (var file in modifications_array) {
+			if (modifications_array.hasOwnProperty(file))
+				for (var file_path in modifications_array[file]) {
+					if (file.hasOwnProperty(file_path)) {
+						if ( modifications_array[file][file_path][0] !== undefined
+							&& modifications_array[file][file_path][1] !== undefined
+							&& modifications_array[file][file_path][2] !== undefined
+							&& modifications_array[file][file_path][3] !== undefined
+						) {
+							data+='\n';
+							data += `			<operation>
+				<search><![CDATA[`;
+							data += modifications_array[file][file_path][3];
+							data += `]]></search>
+					<add position="`+modifications_array[file][file_path][2]+`"><![CDATA[`;
+							data += modifications_array[file][file_path][1];
+							data += `]]></add>
+			</operation>`;
+						}
+					}
 				}
-			}
 		}
+		data+='\n';
+		data += `		</file>`;
+		data+='\n';
 
 		fs.appendFileSync(write_filename, data, function(err){
 			if (err) throw err;
@@ -79,7 +86,7 @@ exports.makeModification = function(options) {
 	// https://stackoverflow.com/questions/25460574/find-files-by-extension-html-under-a-folder-in-nodejs/25462405#25462405
 	function fromDir(startPath, filter, filelist){
 		if (!fs.existsSync(startPath)){
-			console.log("no dir ",startPath);
+			// console.log("no dir ",startPath);
 			return;
 		}
 		filelist = filelist || [];
@@ -108,16 +115,20 @@ exports.makeModification = function(options) {
 	function findMatch(list, filter) {
 		for (var i=0; i<list.length; i++) {
 			(function(filename){
-				console.log('Searching in ' + filename);
+				// console.log('Searching in ' + filename);
 				var contents = fs.readFileSync(filename);
 				var modifications;
 				var match;
+				modifications = [];
 				while ((match = filter.exec(contents)) !== null) {
-					modifications = [];
-					modifications[filename] = [];
-					modifications[filename].push(match['index'], match[3], match[1], match[2]);
+					if (modifications[filename] === undefined) modifications[filename] = [];
+					modifications[filename].push([ match['index'], match[3], match[1], match[2] ]);
+				}
+				if (modifications[filename] !== undefined) {
+					// console.log(modifications);
 					writeModificationFile(filename, modifications);
 				}
+
 
 			})(list[i]);
 		}
