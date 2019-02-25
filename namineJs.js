@@ -13,7 +13,7 @@ exports.makeModification = function(options) {
 		return;
 	}
 
-	var modification_name, author, link, version, modification_path;
+	var modification_name, author, link, version, modification_path, code;
 
 	if (options) {
 		modification_name = (options.hasOwnProperty('modification_name')) ? options['modification_name'] : 'test';
@@ -76,8 +76,8 @@ exports.makeModification = function(options) {
 							data += modifications_array[file][file_path][3]
 										.replace('<\\?php', '<?php')
 										.replace('<\\?', '<?')
-										.replace('\\?>', '?>')
-										.replace('php\\?>', 'php?>');
+										.replace('?\\>', '?>')
+										.replace('php?\\>', 'php?>');
 							data += `]]></search>
 					<add position="`+modifications_array[file][file_path][2]+`"><![CDATA[`;
 							data += modifications_array[file][file_path][1];
