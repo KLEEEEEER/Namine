@@ -1,5 +1,18 @@
 exports.makeModification = function(options) {
   "use strict";
+
+	var fs = require('fs');
+	var path = require('path');
+
+	if (!fs.existsSync("./catalog")) {
+		console.log('There is no catalog directory. Script should be in root.');
+		return;
+	}
+	if (!fs.existsSync("./admin")) {
+		console.log('There is no admin directory. Script should be in root.');
+		return;
+	}
+
 	var modification_name, author, link, version, modification_path;
 
 	if (options) {
@@ -15,9 +28,6 @@ exports.makeModification = function(options) {
 		version = '0.1';
 		modification_path = './';
 	}
-
-	var fs = require('fs');
-	var path = require('path');
 
 	var filt = new RegExp('//-nmn '+modification_name+' pos:"(.*)" line: (.*)[\r\n|\r|\n]([\\s\\S]*?)//-nmn', 'gmu');
 	var filt_html = new RegExp('<!--//-nmn '+modification_name+' pos:"(.*)" line: (.*)-->([\\s\\S]*?)<!--//-nmn-->', 'gmu');
@@ -87,7 +97,6 @@ exports.makeModification = function(options) {
 	// https://stackoverflow.com/questions/25460574/find-files-by-extension-html-under-a-folder-in-nodejs/25462405#25462405
 	function fromDir(startPath, filter, filelist){
 		if (!fs.existsSync(startPath)){
-			// console.log("no dir ",startPath);
 			return;
 		}
 		filelist = filelist || [];
@@ -105,7 +114,6 @@ exports.makeModification = function(options) {
 		return filelist;
 	}
 
-	// TODO: Refactor
 	var file_list_php = fromDir('./catalog/','.php');
 	var file_list_tpl = fromDir('./catalog/','.tpl');
 	var file_list_twig = fromDir('./catalog/','.twig');
@@ -116,7 +124,6 @@ exports.makeModification = function(options) {
 	function findMatch(list, filter) {
 		for (var i=0; i<list.length; i++) {
 			(function(filename){
-				// console.log('Searching in ' + filename);
 				var contents = fs.readFileSync(filename);
 				var modifications;
 				var match;
@@ -131,6 +138,8 @@ exports.makeModification = function(options) {
 			})(list[i]);
 		}
 	}
+
+
 
 	writeModificationFileStart();
 	findMatch(file_list_php, filt);
