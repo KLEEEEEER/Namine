@@ -21,12 +21,14 @@ exports.makeModification = function(options) {
 		link = (options.hasOwnProperty('link')) ? options['link'] : '';
 		version = (options.hasOwnProperty('version')) ? options['version'] : '0.1';
 		modification_path = (options.hasOwnProperty('modification_path')) ? options['modification_path'] : './';
+		code = (options.hasOwnProperty('code')) ? options['code'] : modification_name;
 	} else {
 		modification_name = 'test';
 		author = 'Author';
 		link = '';
 		version = '0.1';
 		modification_path = './';
+		code = modification_name;
 	}
 
 	var filt = new RegExp('//-nmn '+modification_name+' pos:"(.*)" line: (.*)[\r\n|\r|\n]([\\s\\S]*?)//-nmn', 'gmu');
@@ -42,7 +44,7 @@ exports.makeModification = function(options) {
 	<version>`+version+`</version>
 	<author>`+author+`</author>
 	<link>`+link+`</link>
-	<code>`+modification_name+`</code>`;
+	<code>`+code+`</code>`;
 		fs.writeFileSync(write_filename, start_string, function(err){
 			if (err) throw err;
 		});
