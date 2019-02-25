@@ -1,5 +1,5 @@
 exports.makeModification = function(options) {
-
+  "use strict";
 	var modification_name, author, link, version, modification_path;
 
 	if (options) {
@@ -18,7 +18,6 @@ exports.makeModification = function(options) {
 
 	var fs = require('fs');
 	var path = require('path');
-	"use strict";
 
 	var filt = new RegExp('//-nmn '+modification_name+' pos:"(.*)" line: (.*)[\r\n|\r|\n]([\\s\\S]*?)//-nmn', 'gmu');
 	var filt_html = new RegExp('<!--//-nmn '+modification_name+' pos:"(.*)" line: (.*)-->([\\s\\S]*?)<!--//-nmn-->', 'gmu');
@@ -48,9 +47,7 @@ exports.makeModification = function(options) {
 	}
 
 	function writeModificationFile(filename, modifications_array) {
-		var data = '';
-
-		data+='\n';
+		var data = '\n';
 		data += `		<file path="`+filename.replace(/\\/g, '/').replace(/theme\/(.*)\/template/g, 'theme/*/template')+`">`;
 		for (var file in modifications_array) {
 			if (modifications_array.hasOwnProperty(file))
@@ -64,7 +61,11 @@ exports.makeModification = function(options) {
 							data+='\n';
 							data += `			<operation>
 				<search><![CDATA[`;
-							data += modifications_array[file][file_path][3];
+							data += modifications_array[file][file_path][3]
+										.replace('<\\?php', '<?php')
+										.replace('<\\?', '<?')
+										.replace('\\?>', '?>')
+										.replace('php\\?>', 'php?>');
 							data += `]]></search>
 					<add position="`+modifications_array[file][file_path][2]+`"><![CDATA[`;
 							data += modifications_array[file][file_path][1];
@@ -125,11 +126,8 @@ exports.makeModification = function(options) {
 					modifications[filename].push([ match['index'], match[3], match[1], match[2] ]);
 				}
 				if (modifications[filename] !== undefined) {
-					// console.log(modifications);
 					writeModificationFile(filename, modifications);
 				}
-
-
 			})(list[i]);
 		}
 	}
