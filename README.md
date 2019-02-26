@@ -1,9 +1,11 @@
 # Namine
 OpenCart modification parser.
-I made it to parse modifications from dev files.
+Made to parse modifications from dev files.
 So for the start you need two versions of your project: dev and work.
 
 In dev you are writing your modifications with certain commentaries.
+Then you starting this script for parse modification from dev files.
+And after that you install your modification on working site as usual modification.
 
 ## Quick start
 
@@ -36,18 +38,6 @@ MODIFICATION_TEXT
 * LINE - line after, before or replaced of your modification
 * MODIFICATION_TEXT - just your modification
 
-### makeModification() options
-
-* name - Name of modification in xml file. Default: 'test'
-* author - Author of modification in xml file. Default: 'Author'
-* link - Custom link of modification in xml file. Default: ''
-* version - Version of modification in xml file. Default: '0.1'
-* code - Code of saving modification file. Default: modification_name default value or set value
-* modification_path - Path of saving modification file. Default: './'
-
-
-## Example:
-
 ### test.js
 
 ```
@@ -60,6 +50,17 @@ namine.makeModification({
 	version:'0.1',
 });
 ```
+
+#### makeModification() options
+
+* name - Name of modification in xml file. Default: 'test'
+* author - Author of modification in xml file. Default: 'Author'
+* link - Custom link of modification in xml file. Default: ''
+* version - Version of modification in xml file. Default: '0.1'
+* code - Code of saving modification file. Default: modification_name default value or set value
+* modification_path - Path of saving modification file. Default: './'
+* rewrite - Allow script to rewrite output file if it's exists. Default: false
+
 
 ### catalog/controller/product/product.php
 ```
