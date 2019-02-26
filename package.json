@@ -1,6 +1,6 @@
 {
   "name": "namine",
-  "version": "0.1.0-alpha.0",
+  "version": "0.1.0",
   "description": "Modification parser for OpenCart. Just write code in dev files with certain comments and get modification file.",
   "main": "naminejs.js",
   "dependencies": {
