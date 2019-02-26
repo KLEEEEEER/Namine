@@ -38,7 +38,7 @@ MODIFICATION_TEXT
 
 ### makeModification() options
 
-* modification_name - Name of modification in xml file. Default: 'test'
+* name - Name of modification in xml file. Default: 'test'
 * author - Author of modification in xml file. Default: 'Author'
 * link - Custom link of modification in xml file. Default: ''
 * version - Version of modification in xml file. Default: '0.1'
@@ -54,7 +54,7 @@ MODIFICATION_TEXT
 var namine = require('namine');
 
 namine.makeModification({
-	modification_name:'hello',
+	name:'hello',
 	author:'test_author',
 	link:'test.com',
 	version:'0.1',
@@ -106,9 +106,9 @@ namine.makeModification({
 
 	<file path="catalog/view/theme/*/template/product/product.tpl">
 		<operation>
-			<search><![CDATA[<?php echo $column_left; ?>]]></search>
-			<add position="before"><![CDATA[
-	<?php echo $hello1 . $hello2;?>
+			<search><![CDATA[<?php if ($review_status) { ?>]]></search>
+			<add position="after"><![CDATA[
+	<?php echo $hello1 . ' ' . $hello2;?>
 	]]></add>
 		</operation>
 	</file>

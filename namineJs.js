@@ -13,15 +13,16 @@ exports.makeModification = function(options) {
 		return;
 	}
 
-	var modification_name, author, link, version, modification_path, code;
+	var modification_name, author, link, version, modification_path, code, rewrite;
 
 	if (options) {
-		modification_name = (options.hasOwnProperty('modification_name')) ? options['modification_name'] : 'test';
+		modification_name = (options.hasOwnProperty('name')) ? options['name'] : 'test';
 		author = (options.hasOwnProperty('author')) ? options['author'] : 'Author';
 		link = (options.hasOwnProperty('link')) ? options['link'] : '';
 		version = (options.hasOwnProperty('version')) ? options['version'] : '0.1';
 		modification_path = (options.hasOwnProperty('modification_path')) ? options['modification_path'] : './';
 		code = (options.hasOwnProperty('code')) ? options['code'] : modification_name;
+		rewrite = (options.hasOwnProperty('rewrite') && options['rewrite']===true) ? true : false;
 	} else {
 		modification_name = 'test';
 		author = 'Author';
@@ -29,12 +30,18 @@ exports.makeModification = function(options) {
 		version = '0.1';
 		modification_path = './';
 		code = modification_name;
+		rewrite = false;
+	}
+
+  var write_filename = modification_path + modification_name+'.ocmod.xml';
+
+  if (fs.existsSync(write_filename) && !rewrite) {
+		console.log('File ' + write_filename + ' already exists!');
+		return;
 	}
 
 	var filt = new RegExp('//-nmn '+modification_name+' pos:"(.*)" line: (.*)[\r\n|\r|\n]([\\s\\S]*?)//-nmn', 'gmu');
 	var filt_html = new RegExp('<!--//-nmn '+modification_name+' pos:"(.*)" line: (.*)-->([\\s\\S]*?)<!--//-nmn-->', 'gmu');
-
-	var write_filename = modification_path + modification_name+'.ocmod.xml';
 
 	function writeModificationFileStart() {
 		var start_string = `<?xml version="1.0" ?>
