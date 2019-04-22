@@ -1,0 +1,36 @@
+<?xml version="1.0" ?>
+<!DOCTYPE modification []>
+<modification>
+	<name>test</name>
+	<version>0.1</version>
+	<author>test author</author>
+	<link>test link</link>
+	<code>test_code</code>
+		<file path="catalog/test.tpl">
+			<operation>
+				<search><![CDATA[<?php echo "test php string"; ?>]]></search>
+					<add position="before"><![CDATA[
+test public tpl content
+]]></add>
+			</operation>
+		</file>
+
+		<file path="catalog/test.twig">
+			<operation>
+				<search><![CDATA[<?php echo "test php string"; ?>]]></search>
+					<add position="before"><![CDATA[
+test public twig content
+]]></add>
+			</operation>
+		</file>
+
+		<file path="admin/test.php">
+			<operation>
+				<search><![CDATA[<?php echo "test php string"; ?>]]></search>
+					<add position="before"><![CDATA[
+test admin content
+]]></add>
+			</operation>
+		</file>
+
+</modification>
