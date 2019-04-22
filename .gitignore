@@ -1,6 +1,5 @@
 node_modules
 .idea
-test.php
 test2.php
 modifications
 sas
@@ -9,4 +8,5 @@ package-lock.json
 admin
 catalog
 hello.ocmod.xml
-test.js
+!test/catalog/
+!test/admin/
