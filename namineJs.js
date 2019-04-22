@@ -111,7 +111,12 @@ exports.makeModification = function(options) {
 		filelist = filelist || [];
 		var files=fs.readdirSync(startPath,{'withFileTypes':true});
 		for(var i=0;i<files.length;i++){
-			var filename=path.join(startPath,files[i]);
+      var filename = '';
+      if (files[i]['name']) {
+        filename=path.join(startPath,files[i]['name']);
+      } else {
+        filename=path.join(startPath,files[i]);
+      }
 			var stat = fs.lstatSync(filename);
 			if (stat.isDirectory()){
 				fromDir(filename,filter,filelist);
