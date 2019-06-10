@@ -19,7 +19,7 @@ function Namine(options) {
 	this.options.filt_html = new RegExp('<!--//-nmn '+ this.options.modification_name+' pos:"(.*)" line: (.*)-->([\\s\\S]*?)<!--//-nmn-->', 'gmu');
 }
 
-Namine.prototype._findMatch = function(list, filter) {
+Namine.prototype._findMatchAndWrite = function(list, filter) {
     let _this = this;
 		for (var i=0; i<list.length; i++) {
 			(function(filename, _this){
@@ -36,6 +36,27 @@ Namine.prototype._findMatch = function(list, filter) {
 				}
 			})(list[i], _this);
 		}
+}
+
+Namine.prototype._findMatch = function(list, filter) {
+    let _this = this;
+    let modifications = [];
+		for (var i=0; i<list.length; i++) {
+			modifications = modifications.concat( (function(filename, _this){
+				var contents = fs.readFileSync(filename);
+				var modifications;
+				var match;
+				modifications = [];
+				while ((match = filter.exec(contents)) !== null) {
+					//if (modifications[filename] === undefined) modifications[filename] = [];
+					modifications.push([ match['index'], match[3], match[1], match[2] ]);
+				}
+				if (modifications !== undefined) {
+					return modifications;
+				}
+			})(list[i], _this) );
+		}
+    return modifications;
 }
 
 Namine.prototype._writeModificationFileEnd = function() {
@@ -98,6 +119,33 @@ Namine.prototype._writeModificationFile = function(filename, modifications_array
   });
 }
 
+Namine.prototype.countModifications = function() {
+  var file_list_php = fromDir(this.options.modification_path + 'catalog/','.php');
+	var file_list_tpl = fromDir(this.options.modification_path + 'catalog/','.tpl');
+	var file_list_twig = fromDir(this.options.modification_path + 'catalog/','.twig');
+	var admin_file_list_php = fromDir(this.options.modification_path + 'admin/','.php');
+	var admin_file_list_tpl = fromDir(this.options.modification_path + 'admin/','.tpl');
+	var admin_file_list_twig = fromDir(this.options.modification_path + 'admin/','.twig');
+
+  var modifications = [];
+
+  var file_list_php_matches = this._findMatch(file_list_php, this.options.filt);
+  var file_list_tpl_matches = this._findMatch(file_list_tpl, this.options.filt_html);
+  var file_list_twig_matches = this._findMatch(file_list_twig, this.options.filt_html);
+  var admin_file_list_php_matches = this._findMatch(admin_file_list_php, this.options.filt);
+  var admin_file_list_tpl_matches = this._findMatch(admin_file_list_tpl, this.options.filt_html);
+  var admin_file_list_twig_matches = this._findMatch(admin_file_list_twig, this.options.filt_html);
+
+  if (file_list_php_matches.length > 0) modifications = modifications.concat(file_list_php_matches);
+  if (file_list_tpl_matches.length > 0) modifications = modifications.concat(file_list_tpl_matches);
+  if (file_list_twig_matches.length > 0) modifications = modifications.concat(file_list_twig_matches);
+  if (admin_file_list_php_matches.length > 0) modifications = modifications.concat(admin_file_list_php_matches);
+  if (admin_file_list_tpl_matches.length > 0) modifications = modifications.concat(admin_file_list_tpl_matches);
+  if (admin_file_list_twig_matches.length > 0) modifications = modifications.concat(admin_file_list_twig_matches);
+
+  return modifications.length;
+}
+
 
 Namine.prototype.makeModification = function() {
   let _this = this;
@@ -123,12 +171,12 @@ Namine.prototype.makeModification = function() {
 	var admin_file_list_twig = fromDir(this.options.modification_path + 'admin/','.twig');
 
   this._writeModificationFileStart();
-	this._findMatch(file_list_php, this.options.filt);
-	this._findMatch(file_list_tpl, this.options.filt_html);
-	this._findMatch(file_list_twig, this.options.filt_html);
-	this._findMatch(admin_file_list_php, this.options.filt);
-  this._findMatch(admin_file_list_tpl, this.options.filt_html);
-	this._findMatch(admin_file_list_twig, this.options.filt_html);
+	this._findMatchAndWrite(file_list_php, this.options.filt);
+	this._findMatchAndWrite(file_list_tpl, this.options.filt_html);
+	this._findMatchAndWrite(file_list_twig, this.options.filt_html);
+	this._findMatchAndWrite(admin_file_list_php, this.options.filt);
+  this._findMatchAndWrite(admin_file_list_tpl, this.options.filt_html);
+	this._findMatchAndWrite(admin_file_list_twig, this.options.filt_html);
 	this._writeModificationFileEnd();
 }
 

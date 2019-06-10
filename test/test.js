@@ -14,6 +14,8 @@ var namine = new Namine({
 
 namine.makeModification();
 
+console.log(namine.countModifications());
+
 describe('Functions', function() {
     it('Generated xml should be equals to test_expected file', function() {
       var file_buffer = fs.readFileSync('./test/test.ocmod.xml', 'utf8').toString();
