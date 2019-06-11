@@ -2,6 +2,7 @@
 
 var fs = require('fs');
 var path = require('path');
+var uniqid = require('uniqid');
 
 function Namine(options) {
   this.options = Object.assign({
@@ -144,10 +145,13 @@ Namine.prototype._getAllModifications = function() {
   if (admin_file_list_tpl_matches.length > 0) modifications = modifications.concat(admin_file_list_tpl_matches);
   if (admin_file_list_twig_matches.length > 0) modifications = modifications.concat(admin_file_list_twig_matches);
 
+  modifications = setIdToModifications(modifications);
+
   return modifications;
 }
 
 Namine.prototype.writeJsonModification = function() {
+  //console.log(generateId());
   if (this.options.cache_dir) {
     var modifications = this._getAllModifications();
     if (!fs.existsSync(this.options.cache_dir)){
@@ -223,6 +227,15 @@ function fromDir(startPath, filter, filelist){
     }
   }
   return filelist;
+}
+
+function setIdToModifications(modifications) {
+  var return_modifications = {};
+  for (var modification in modifications) {
+    var new_modification_id = uniqid();
+    return_modifications[new_modification_id] = modifications[modification];
+  }
+  return return_modifications;
 }
 
 
