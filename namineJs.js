@@ -119,7 +119,7 @@ Namine.prototype._writeModificationFile = function(filename, modifications_array
   });
 }
 
-Namine.prototype.countModifications = function() {
+Namine.prototype._getAllModifications = function() {
   var file_list_php = fromDir(this.options.modification_path + 'catalog/','.php');
 	var file_list_tpl = fromDir(this.options.modification_path + 'catalog/','.tpl');
 	var file_list_twig = fromDir(this.options.modification_path + 'catalog/','.twig');
@@ -143,6 +143,11 @@ Namine.prototype.countModifications = function() {
   if (admin_file_list_tpl_matches.length > 0) modifications = modifications.concat(admin_file_list_tpl_matches);
   if (admin_file_list_twig_matches.length > 0) modifications = modifications.concat(admin_file_list_twig_matches);
 
+  return modifications;
+}
+
+Namine.prototype.countModifications = function() {
+  var modifications = this._getAllModifications();
   return modifications.length;
 }
 
@@ -158,8 +163,8 @@ Namine.prototype.makeModification = function() {
 		console.log('There is no admin directory. Script should be in root.');
 		return;
 	}
-  if (fs.existsSync(this.write_filename) && !this.rewrite) {
-		console.log('File ' + write_filename + ' already exists!');
+  if (fs.existsSync(this.options.write_filename) && !this.options.rewrite) {
+		console.log('File ' + this.options.write_filename + ' already exists! If you need to enable rewriting - set option "rewrite" to true.');
 		return;
 	}
 
