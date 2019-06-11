@@ -10,11 +10,13 @@ var namine = new Namine({
   'version': '0.1',
   'code': 'test_code',
   'modification_path': './test/',
+  'cache_dir': './test/cache/',
 });
 
-namine.makeModification();
+//namine.makeModification();
+namine.writeJsonModification();
 
-console.log(namine.countModifications());
+//console.log(namine._getAllModifications());
 
 describe('Functions', function() {
     it('Generated xml should be equals to test_expected file', function() {

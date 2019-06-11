@@ -1,0 +1,1 @@
+[[25,"\r\ntest public tpl content\r\n","before","<\\?php echo \"test php string\"; ?\\>"],[25,"\r\ntest public twig content\r\n","before","<\\?php echo \"test php string\"; ?\\>"],[25,"\ntest admin content\r\n","before","<\\?php echo \"test php string\"; ?\\>"]]

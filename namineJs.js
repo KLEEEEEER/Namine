@@ -12,6 +12,7 @@ function Namine(options) {
     modification_path: './',
     code: this.modification_name,
     rewrite: false,
+    cache_dir: false,
 	}, options);
   this.options.write_filename = this.options.modification_path +
   this.options.modification_name+'.ocmod.xml';
@@ -144,6 +145,20 @@ Namine.prototype._getAllModifications = function() {
   if (admin_file_list_twig_matches.length > 0) modifications = modifications.concat(admin_file_list_twig_matches);
 
   return modifications;
+}
+
+Namine.prototype.writeJsonModification = function() {
+  if (this.options.cache_dir) {
+    var modifications = this._getAllModifications();
+    if (!fs.existsSync(this.options.cache_dir)){
+        fs.mkdirSync(this.options.cache_dir);
+    }
+    fs.writeFileSync(this.options.cache_dir + this.options.modification_name + '.cache.json', JSON.stringify(modifications), function(err){
+      if (err) throw err;
+    });
+  } else {
+    console.log('Option cache_dir is not set.');
+  }
 }
 
 Namine.prototype.countModifications = function() {
