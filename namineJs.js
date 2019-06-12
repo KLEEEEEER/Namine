@@ -61,6 +61,30 @@ Namine.prototype._findMatch = function(list, filter) {
     return modifications;
 }
 
+Namine.prototype._findMatchObject = function(list, filter) {
+    let _this = this;
+    let modifications = {};
+		for (var i=0; i<list.length; i++) {
+			modifications = Object.assign(modifications, (function(filename, _this){
+				var contents = fs.readFileSync(filename);
+				var modifications;
+				var match;
+				modifications = {};
+				while ((match = filter.exec(contents)) !== null) {
+          var unique_id = uniqid();
+					//if (modifications[filename] === undefined) modifications[filename] = [];
+          var temp_obj = {};
+          temp_obj[unique_id] = [match['index'], match[3], match[1], match[2]]
+					modifications = Object.assign(modifications, temp_obj);
+				}
+				if (modifications !== undefined) {
+					return modifications;
+				}
+			})(list[i], _this) );
+		}
+    return modifications;
+}
+
 Namine.prototype._writeModificationFileEnd = function() {
     var end_string = `
 </modification>`;
@@ -150,10 +174,32 @@ Namine.prototype._getAllModifications = function() {
   return modifications;
 }
 
+Namine.prototype._getAllModificationsObject = function() {
+  var file_list_php        = fromDir(this.options.modification_path + 'catalog/','.php');
+	var file_list_tpl        = fromDir(this.options.modification_path + 'catalog/','.tpl');
+	var file_list_twig       = fromDir(this.options.modification_path + 'catalog/','.twig');
+	var admin_file_list_php  = fromDir(this.options.modification_path + 'admin/','.php');
+	var admin_file_list_tpl  = fromDir(this.options.modification_path + 'admin/','.tpl');
+	var admin_file_list_twig = fromDir(this.options.modification_path + 'admin/','.twig');
+
+  var modifications = {};
+
+  var file_list_php_matches        = this._findMatchObject(file_list_php, this.options.filt);
+  var file_list_tpl_matches        = this._findMatchObject(file_list_tpl, this.options.filt_html);
+  var file_list_twig_matches       = this._findMatchObject(file_list_twig, this.options.filt_html);
+  var admin_file_list_php_matches  = this._findMatchObject(admin_file_list_php, this.options.filt);
+  var admin_file_list_tpl_matches  = this._findMatchObject(admin_file_list_tpl, this.options.filt_html);
+  var admin_file_list_twig_matches = this._findMatchObject(admin_file_list_twig, this.options.filt_html);
+
+  modifications = Object.assign(modifications, file_list_php_matches, file_list_tpl_matches, file_list_twig_matches, admin_file_list_php_matches, admin_file_list_tpl_matches, admin_file_list_twig_matches);
+
+  return modifications;
+}
+
 Namine.prototype.writeJsonModification = function() {
   //console.log(generateId());
   if (this.options.cache_dir) {
-    var modifications = this._getAllModifications();
+    var modifications = this._getAllModificationsObject();
     if (!fs.existsSync(this.options.cache_dir)){
         fs.mkdirSync(this.options.cache_dir);
     }
@@ -227,15 +273,6 @@ function fromDir(startPath, filter, filelist){
     }
   }
   return filelist;
-}
-
-function setIdToModifications(modifications) {
-  var return_modifications = {};
-  for (var modification in modifications) {
-    var new_modification_id = uniqid();
-    return_modifications[new_modification_id] = modifications[modification];
-  }
-  return return_modifications;
 }
 
 
