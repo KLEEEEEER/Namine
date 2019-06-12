@@ -61,7 +61,7 @@ Namine.prototype._findMatch = function(list, filter) {
     return modifications;
 }
 
-Namine.prototype._findMatchObject = function(list, filter) {
+Namine.prototype._findMatchObject = function(list, filter, action = '') {
     let _this = this;
     let modifications = {};
 		for (var i=0; i<list.length; i++) {
@@ -72,6 +72,15 @@ Namine.prototype._findMatchObject = function(list, filter) {
 				modifications = {};
 				while ((match = filter.exec(contents)) !== null) {
           var unique_id = uniqid();
+          switch (action) {
+            case 'put_id':
+              // TODO: Тут нужно что-то сделать, так как могут исопльзоваться разные фильтры и нужно заменять на разные комментарии.
+              break;
+            case 'get_from_cache':
+              break;
+            default:
+              break;
+          }
 					//if (modifications[filename] === undefined) modifications[filename] = [];
           var temp_obj = {};
           temp_obj[unique_id] = [match['index'], match[3], match[1], match[2]]
