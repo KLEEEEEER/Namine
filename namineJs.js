@@ -74,7 +74,17 @@ Namine.prototype._findMatchObject = function(list, filter, action = '') {
           var unique_id = uniqid();
           switch (action) {
             case 'put_id':
-              // TODO: Тут нужно что-то сделать, так как могут исопльзоваться разные фильтры и нужно заменять на разные комментарии.
+              switch (filter) {
+                case _this.options.filt:
+                  contents = contents.toString().replace(match[0], '//-nmn '+unique_id);
+                  break;
+                case _this.options.filt_html:
+                  contents = contents.toString().replace(match[0], '<!--//-nmn '+unique_id+' -->');
+                  break;
+              }
+              fs.writeFileSync(filename, contents, function(err){
+                if (err) throw err;
+              });
               break;
             case 'get_from_cache':
               break;
@@ -193,12 +203,12 @@ Namine.prototype._getAllModificationsObject = function() {
 
   var modifications = {};
 
-  var file_list_php_matches        = this._findMatchObject(file_list_php, this.options.filt);
-  var file_list_tpl_matches        = this._findMatchObject(file_list_tpl, this.options.filt_html);
-  var file_list_twig_matches       = this._findMatchObject(file_list_twig, this.options.filt_html);
-  var admin_file_list_php_matches  = this._findMatchObject(admin_file_list_php, this.options.filt);
-  var admin_file_list_tpl_matches  = this._findMatchObject(admin_file_list_tpl, this.options.filt_html);
-  var admin_file_list_twig_matches = this._findMatchObject(admin_file_list_twig, this.options.filt_html);
+  var file_list_php_matches        = this._findMatchObject(file_list_php, this.options.filt, 'put_id');
+  var file_list_tpl_matches        = this._findMatchObject(file_list_tpl, this.options.filt_html, 'put_id');
+  var file_list_twig_matches       = this._findMatchObject(file_list_twig, this.options.filt_html, 'put_id');
+  var admin_file_list_php_matches  = this._findMatchObject(admin_file_list_php, this.options.filt, 'put_id');
+  var admin_file_list_tpl_matches  = this._findMatchObject(admin_file_list_tpl, this.options.filt_html, 'put_id');
+  var admin_file_list_twig_matches = this._findMatchObject(admin_file_list_twig, this.options.filt_html, 'put_id');
 
   modifications = Object.assign(modifications, file_list_php_matches, file_list_tpl_matches, file_list_twig_matches, admin_file_list_php_matches, admin_file_list_tpl_matches, admin_file_list_twig_matches);
 
