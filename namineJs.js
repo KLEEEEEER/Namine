@@ -269,6 +269,19 @@ Namine.prototype.makeModification = function() {
 	this._writeModificationFileEnd();
 }
 
+Namine.prototype._getTemplatedContent = function(template_name, data) {
+  let template_full_path = __dirname + '/templates/'+template_name+'.xml';
+  if (!fs.existsSync(template_full_path)) {
+    console.log('There is no template named '+template_name+'.');
+    return false;
+  }
+  var template_content = fs.readFileSync(template_full_path).toString();
+  for (let key in data) {
+    template_content = template_content.replace('{{'+key+'}}', data[key]);
+  }
+  return template_content;
+}
+
 // https://stackoverflow.com/questions/25460574/find-files-by-extension-html-under-a-folder-in-nodejs/25462405#25462405
 function fromDir(startPath, filter, filelist){
   if (!fs.existsSync(startPath)){
