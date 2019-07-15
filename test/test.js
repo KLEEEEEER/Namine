@@ -13,16 +13,16 @@ var namine = new Namine({
   'cache_dir': './test/cache/',
 });
 
-//namine.makeModification();
+namine.makeModification();
 //namine.writeJsonModification();
 
-console.log( namine._getTemplatedContent('main', {
-  'modification_name': 'ass',
-  'version': 'assversion',
-  'author': 'assauthor',
-  'link': 'asslink',
-  'code': 'asscode',
-}).toString('utf8') );
+// console.log( namine._getTemplatedContent('main', {
+//   'modification_name': 'ass',
+//   'version': 'assversion',
+//   'author': 'assauthor',
+//   'link': 'asslink',
+//   'code': 'asscode',
+// }).toString('utf8') );
 
 //console.log(namine._getAllModifications());
 
