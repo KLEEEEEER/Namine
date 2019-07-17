@@ -14,6 +14,7 @@ var namine = new Namine({
 });
 
 namine.makeModification();
+//namine.getNumberOfModifications();
 //namine.writeJsonModification();
 
 // console.log( namine._getTemplatedContent('main', {

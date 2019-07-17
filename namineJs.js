@@ -25,10 +25,9 @@ function Namine(options) {
 	this.options.html_filter = new RegExp('<!--//-nmn '+ this.options.modification_name+' pos:"(.*)" line: (.*)-->([\\s\\S]*?)<!--//-nmn-->', 'gmu');
 }
 
-Namine.prototype.countModifications = function() {
+Namine.prototype.getNumberOfModifications = function() {
   var modifications = this._getAllModifications();
-  // TODO: Доделать функцию рассчёта
-  return modifications.length;
+  return this._countModifications(modifications);
 }
 
 Namine.prototype.makeModification = function() {
@@ -76,6 +75,16 @@ Namine.prototype._getAllModifications = function() {
   }) );
 
   return modifications;
+}
+
+Namine.prototype._countModifications = function(modifications_object) {
+  let count = 0;
+  for (let filename in modifications_object) {
+    for (let modification in modifications_object[filename]) {
+      count++;
+    }
+  }
+  return count;
 }
 
 Namine.prototype._getModifications = function(options) {
