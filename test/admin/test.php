@@ -1,3 +1,5 @@
 YOU ARE NOT SEEING THIS
-//-nmn 5lifqkjx1u259m
+//-nmn test pos:"before" line: <\?php echo "test php string"; ?\>
+test admin content
+//-nmn
 YOU ARE NOT SEEING THIS
