@@ -18,6 +18,14 @@ function Namine(options) {
     code: this.modification_name,
     rewrite: false,
     cache_dir: false,
+    directories: [
+      {dir: 'catalog', extension: 'php'},
+      {dir: 'catalog', extension: 'tpl'},
+      {dir: 'catalog', extension: 'twig'},
+      {dir: 'admin', extension: 'php'},
+      {dir: 'admin', extension: 'tpl'},
+      {dir: 'admin', extension: 'twig'},
+    ]
 	}, options);
   this.options.write_filename = this.options.modification_path +
   this.options.modification_name+'.ocmod.xml';
@@ -38,41 +46,13 @@ Namine.prototype.makeModification = function() {
 Namine.prototype._getAllModifications = function() {
   let modifications = {};
 
-  modifications = Object.assign(modifications, this._getModifications({
-    dir: 'catalog',
-    extension: 'php',
-    filter: this.options.php_filter
-  }) );
-
-  modifications = Object.assign(modifications, this._getModifications({
-    dir: 'catalog',
-    extension: 'tpl',
-    filter: this.options.html_filter
-  }) );
-
-  modifications = Object.assign(modifications, this._getModifications({
-    dir: 'catalog',
-    extension: 'twig',
-    filter: this.options.html_filter
-  }) );
-
-  modifications = Object.assign(modifications, this._getModifications({
-    dir: 'admin',
-    extension: 'php',
-    filter: this.options.php_filter
-  }) );
-
-  modifications = Object.assign(modifications, this._getModifications({
-    dir: 'admin',
-    extension: 'tpl',
-    filter: this.options.html_filter
-  }) );
-
-  modifications = Object.assign(modifications, this._getModifications({
-    dir: 'admin',
-    extension: 'twig',
-    filter: this.options.html_filter
-  }) );
+  for (let key in this.options.directories) {
+    if (this.options.directories[key].dir && this.options.directories[key].extension)
+      modifications = Object.assign(modifications, this._getModifications({
+        dir: this.options.directories[key].dir,
+        extension: this.options.directories[key].extension
+      }) );
+  }
 
   return modifications;
 }
@@ -90,26 +70,45 @@ Namine.prototype._countModifications = function(modifications_object) {
 Namine.prototype._getModifications = function(options) {
   if (!options.dir) return false;
   if (!options.extension) return false;
-  if (!options.filter) return false;
+
+  let filter;
+  switch (options.extension) {
+    case 'php':
+      filter = this.options.php_filter;
+      break;
+    case 'tpl':
+      filter = this.options.html_filter;
+      break;
+    case 'twig':
+      filter = this.options.html_filter;
+      break;
+    default:
+      filter = '';
+  }
+  if (filter == '') {
+    console.log('Extension .'+options.extension+' is not supported!');
+    return false;
+  }
 
   let list= fromDir(this.options.modification_path + options.dir + '/','.'+options.extension);
 
   let modifications = {};
 
-  for (var i=0; i<list.length; i++) {
-			modifications = Object.assign(modifications, (function(filename, _this, filter){
-				let contents = fs.readFileSync(filename);
-				let modifications;
-				let match;
-				modifications = [];
-				while ((match = filter.exec(contents)) !== null) {
-					if (modifications[filename] === undefined) modifications[filename] = [];
-					modifications[filename].push([ match['index'], match[3], match[1], match[2] ]);
-				}
-				return modifications;
+  if (list !== undefined)
+    for (var i=0; i<list.length; i++) {
+  			modifications = Object.assign(modifications, (function(filename, _this, filter){
+  				let contents = fs.readFileSync(filename);
+  				let modifications;
+  				let match;
+  				modifications = [];
+  				while ((match = filter.exec(contents)) !== null) {
+  					if (modifications[filename] === undefined) modifications[filename] = [];
+  					modifications[filename].push([ match['index'], match[3], match[1], match[2] ]);
+  				}
+  				return modifications;
 
-			})(list[i], this, options.filter) );
-		}
+  			})(list[i], this, filter) );
+  		}
 
   return modifications;
 }

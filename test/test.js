@@ -10,7 +10,7 @@ var namine = new Namine({
   'version': '0.1',
   'code': 'test_code',
   'modification_path': './test/',
-  'cache_dir': './test/cache/',
+  'cache_dir': './test/cache/'
 });
 
 namine.makeModification();
