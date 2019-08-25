@@ -1,0 +1,3 @@
+<file path="{{file_path}}">
+      {{modifications_template}}
+</file>

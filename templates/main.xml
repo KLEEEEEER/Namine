@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<!DOCTYPE modification []>
+<modification>
+  <name>{{modification_name}}</name>
+  <version>{{version}}</version>
+  <author>{{author}}</author>
+  <link>{{link}}</link>
+  <code>{{code}}</code>
+    {{modifications}}
+</modification>

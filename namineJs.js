@@ -1,166 +1,177 @@
-exports.makeModification = function(options) {
-  "use strict";
+"use strict";
 
-	var fs = require('fs');
-	var path = require('path');
+var fs = require('fs');
+var path = require('path');
+let prettifyXml = require('prettify-xml')
+let Template = require('./includes/template');
 
-	if (!fs.existsSync("./catalog")) {
-		console.log('There is no catalog directory. Script should be in root.');
-		return;
-	}
-	if (!fs.existsSync("./admin")) {
-		console.log('There is no admin directory. Script should be in root.');
-		return;
-	}
+function Namine(options) {
+  this.options = Object.assign({
+    modification_name:'test',
+    author: 'Author',
+    link: '',
+    version: '0.1',
+    modification_path: './',
+    code: this.modification_name,
+    rewrite: false,
+    cache_dir: false,
+    directories: [
+      {dir: 'catalog', extension: 'php'},
+      {dir: 'catalog', extension: 'tpl'},
+      {dir: 'catalog', extension: 'twig'},
+      {dir: 'admin', extension: 'php'},
+      {dir: 'admin', extension: 'tpl'},
+      {dir: 'admin', extension: 'twig'},
+    ]
+	}, options);
+  this.options.write_filename = this.options.modification_path +
+  this.options.modification_name+'.ocmod.xml';
+  this.options.php_filter = new RegExp('//-nmn '+ this.options.modification_name+' pos:"(.*)" line: (.*)[\r\n|\r|\n]([\\s\\S]*?)//-nmn', 'gmu');
+	this.options.html_filter = new RegExp('<!--//-nmn-html '+ this.options.modification_name+' pos:"(.*)" line: (.*)-->([\\s\\S]*?)<!--//-nmn-html-->', 'gmu');
+}
 
-	var modification_name, author, link, version, modification_path, code, rewrite;
+Namine.prototype.getNumberOfModifications = function() {
+  var modifications = this._getAllModifications();
+  return this._countModifications(modifications);
+}
 
-	if (options) {
-		modification_name = (options.hasOwnProperty('name')) ? options['name'] : 'test';
-		author = (options.hasOwnProperty('author')) ? options['author'] : 'Author';
-		link = (options.hasOwnProperty('link')) ? options['link'] : '';
-		version = (options.hasOwnProperty('version')) ? options['version'] : '0.1';
-		modification_path = (options.hasOwnProperty('modification_path')) ? options['modification_path'] : './';
-		code = (options.hasOwnProperty('code')) ? options['code'] : modification_name;
-		rewrite = (options.hasOwnProperty('rewrite') && options['rewrite']===true) ? true : false;
-	} else {
-		modification_name = 'test';
-		author = 'Author';
-		link = '';
-		version = '0.1';
-		modification_path = './';
-		code = modification_name;
-		rewrite = false;
-	}
+Namine.prototype.makeModification = function() {
+  let modifications = this._getAllModifications();
+  this._writeModificationFile(modifications);
+}
 
-  var write_filename = modification_path + modification_name+'.ocmod.xml';
+Namine.prototype._getAllModifications = function() {
+  let modifications = {};
 
-  if (fs.existsSync(write_filename) && !rewrite) {
-		console.log('File ' + write_filename + ' already exists!');
-		return;
-	}
+  for (let key in this.options.directories) {
+    if (this.options.directories[key].dir && this.options.directories[key].extension)
+      modifications = Object.assign(modifications, this._getModifications({
+        dir: this.options.directories[key].dir,
+        extension: this.options.directories[key].extension
+      }) );
+  }
 
-	var filt = new RegExp('//-nmn '+modification_name+' pos:"(.*)" line: (.*)[\r\n|\r|\n]([\\s\\S]*?)//-nmn', 'gmu');
-	var filt_html = new RegExp('<!--//-nmn '+modification_name+' pos:"(.*)" line: (.*)-->([\\s\\S]*?)<!--//-nmn-->', 'gmu');
+  return modifications;
+}
 
-	function writeModificationFileStart() {
-		var start_string = `<?xml version="1.0" ?>
-<!DOCTYPE modification []>
-<modification>
-	<name>`+modification_name+`</name>
-	<version>`+version+`</version>
-	<author>`+author+`</author>
-	<link>`+link+`</link>
-	<code>`+code+`</code>`;
-		fs.writeFileSync(write_filename, start_string, function(err){
-			if (err) throw err;
-		});
-	}
+Namine.prototype._countModifications = function(modifications_object) {
+  let count = 0;
+  for (let filename in modifications_object) {
+    for (let modification in modifications_object[filename]) {
+      count++;
+    }
+  }
+  return count;
+}
 
-	function writeModificationFileEnd() {
-		var end_string = `
-</modification>`;
-		fs.appendFileSync(write_filename, end_string, function(err){
-			if (err) throw err;
-		});
-	}
+Namine.prototype._getModifications = function(options) {
+  if (!options.dir) return false;
+  if (!options.extension) return false;
 
-	function writeModificationFile(filename, modifications_array) {
-		var data = '\n';
-		data += `		<file path="`+filename.replace(/\\/g, '/').replace(/theme\/(.*)\/template/g, 'theme/*/template')+`">`;
-		for (var file in modifications_array) {
-			if (modifications_array.hasOwnProperty(file))
-				for (var file_path in modifications_array[file]) {
-					if (file.hasOwnProperty(file_path)) {
-						if ( modifications_array[file][file_path][0] !== undefined
-							&& modifications_array[file][file_path][1] !== undefined
-							&& modifications_array[file][file_path][2] !== undefined
-							&& modifications_array[file][file_path][3] !== undefined
-						) {
-							data+='\n';
-							data += `			<operation>
-				<search><![CDATA[`;
-							data += modifications_array[file][file_path][3]
-										.replace('<\\?php', '<?php')
-										.replace('<\\?', '<?')
-										.replace('?\\>', '?>')
-										.replace('php?\\>', 'php?>');
-							data += `]]></search>
-					<add position="`+modifications_array[file][file_path][2]+`"><![CDATA[`;
-							data += modifications_array[file][file_path][1];
-							data += `]]></add>
-			</operation>`;
-						}
-					}
-				}
-		}
-		data+='\n';
-		data += `		</file>`;
-		data+='\n';
+  let list= fromDir(this.options.modification_path + options.dir + '/','.'+options.extension);
 
-		fs.appendFileSync(write_filename, data, function(err){
-			if (err) throw err;
-		});
-	}
+  let modifications = {};
 
-	// https://stackoverflow.com/questions/25460574/find-files-by-extension-html-under-a-folder-in-nodejs/25462405#25462405
-	function fromDir(startPath, filter, filelist){
-		if (!fs.existsSync(startPath)){
-			return;
-		}
-		filelist = filelist || [];
-		var files=fs.readdirSync(startPath,{'withFileTypes':true});
-		for(var i=0;i<files.length;i++){
-      var filename = '';
-      if (files[i]['name']) {
-        filename=path.join(startPath,files[i]['name']);
-      } else {
-        filename=path.join(startPath,files[i]);
-      }
-			var stat = fs.lstatSync(filename);
-			if (stat.isDirectory()){
-				fromDir(filename,filter,filelist);
-			}
-			else if (filename.indexOf(filter)>=0) {
-				filelist.push(filename);
-			}
-		}
-		return filelist;
-	}
+	modifications = this._findModificationsByFilter(list, this.options.php_filter, modifications);
+	modifications = this._findModificationsByFilter(list, this.options.html_filter, modifications);
 
-	var file_list_php = fromDir('./catalog/','.php');
-	var file_list_tpl = fromDir('./catalog/','.tpl');
-	var file_list_twig = fromDir('./catalog/','.twig');
-	var admin_file_list_php = fromDir('./admin/','.php');
-	var admin_file_list_tpl = fromDir('./admin/','.tpl');
-	var admin_file_list_twig = fromDir('./admin/','.twig');
+  return modifications;
+}
 
-	function findMatch(list, filter) {
+Namine.prototype._findModificationsByFilter = function(list, filter, modifications_obj) {
+	let modifications_obj_temp = modifications_obj;
+	if (list !== undefined)
 		for (var i=0; i<list.length; i++) {
-			(function(filename){
-				var contents = fs.readFileSync(filename);
-				var modifications;
-				var match;
+			let modifications = {};
+			modifications = (function(filename, _this, filter){
+				let contents = fs.readFileSync(filename);
+				let modifications;
+				let match;
 				modifications = [];
 				while ((match = filter.exec(contents)) !== null) {
 					if (modifications[filename] === undefined) modifications[filename] = [];
 					modifications[filename].push([ match['index'], match[3], match[1], match[2] ]);
 				}
-				if (modifications[filename] !== undefined) {
-					writeModificationFile(filename, modifications);
+				return modifications;
+			})(list[i], this, filter);
+			if (Object.keys(modifications).length > 0) {
+				let object_values = Object.values(modifications[list[i]]);
+				if (modifications_obj_temp.hasOwnProperty(list[i])) {
+					Array.prototype.push.apply(modifications_obj_temp[list[i]], object_values);
+				} else {
+					modifications_obj_temp[list[i]] = modifications[list[i]];
 				}
-			})(list[i]);
+			}
 		}
-	}
+  return modifications_obj;
+}
 
+Namine.prototype._getModificationFileContent = function(modifications) {
+  let modification_file_template = '';
+  let modifications_template = '';
 
+  let template = new Template();
 
-	writeModificationFileStart();
-	findMatch(file_list_php, filt);
-	findMatch(file_list_tpl, filt_html);
-	findMatch(file_list_twig, filt_html);
-	findMatch(admin_file_list_php, filt);
-	findMatch(admin_file_list_tpl, filt_html);
-	findMatch(admin_file_list_twig, filt_html);
-	writeModificationFileEnd();
-};
+  for (let filename in modifications) {
+    modifications_template = '';
+    for (let modification in modifications[filename]) {
+      modifications_template += template.getTemplatedContent('modification', {
+        'search_string'        : modifications[filename][modification][3]
+                                          .replace('<\\?php', '<?php')
+                                          .replace('<\\?', '<?')
+                                          .replace('?\\>', '?>')
+                                          .replace('php?\\>', 'php?>'),
+        'position'             : modifications[filename][modification][2],
+        'modification_content' : modifications[filename][modification][1],
+      });
+    }
+    modification_file_template += template.getTemplatedContent('modification_file', {
+      'file_path'              : filename.replace(/\\/g, '/').replace(/theme\/(.*)\/template/g, 'theme/*/template'),
+      'modifications_template' : modifications_template,
+    });
+  }
+
+  let ocmod_content = template.getTemplatedContent('main', {
+    'modification_name': this.options.modification_name,
+    'version': this.options.version,
+    'author': this.options.author,
+    'link': this.options.link,
+    'code': this.options.code,
+    'modifications': modification_file_template,
+  });
+
+  return prettifyXml(ocmod_content,{indent: 2, newline: '\n'});
+}
+
+Namine.prototype._writeModificationFile = function(modifications) {
+  let content = this._getModificationFileContent(modifications);
+  fs.writeFileSync(this.options.write_filename, content, function(err){
+    if (err) throw err;
+  });
+}
+
+function fromDir(startPath, filter, filelist){
+  if (!fs.existsSync(startPath)){
+    return;
+  }
+  filelist = filelist || [];
+  var files=fs.readdirSync(startPath,{'withFileTypes':true});
+  for(var i=0;i<files.length;i++){
+    var filename = '';
+    if (files[i]['name']) {
+      filename=path.join(startPath,files[i]['name']);
+    } else {
+      filename=path.join(startPath,files[i]);
+    }
+    var stat = fs.lstatSync(filename);
+    if (stat.isDirectory()){
+      fromDir(filename,filter,filelist);
+    }
+    else if (filename.indexOf(filter)>=0) {
+      filelist.push(filename);
+    }
+  }
+  return filelist;
+}
+
+module.exports = Namine;

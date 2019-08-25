@@ -1,15 +1,18 @@
 var assert = require('assert');
-var namine = require('../namineJs.js');
+var Namine = require('../namineJs.js');
 var fs = require('fs');
 
-namine.makeModification({
-  'name': 'test',
+var namine = new Namine({
+  'modification_name': 'test',
   'rewrite': true,
   'author': 'test author',
   'link': 'test link',
   'version': '0.1',
   'code': 'test_code',
+  'modification_path': './test/',
 });
+
+namine.makeModification();
 
 describe('Functions', function() {
     it('Generated xml should be equals to test_expected file', function() {

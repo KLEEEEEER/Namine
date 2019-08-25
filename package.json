@@ -5,7 +5,8 @@
   "main": "naminejs.js",
   "dependencies": {
     "fs": "^0.0.1-security",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "prettify-xml": "^1.2.0"
   },
   "devDependencies": {
     "chai-files": "^1.4.0",
