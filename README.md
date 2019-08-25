@@ -46,7 +46,7 @@ namine.makeModification();
 
 **directories** - (array) An array for specifying search directories for modifications and search extensions.
 
-> Стандартный массив:
+> Default directories option array:
 >```
 >directories: [
 >      {dir: 'catalog', extension: 'php'},
