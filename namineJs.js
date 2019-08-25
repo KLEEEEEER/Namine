@@ -2,10 +2,7 @@
 
 var fs = require('fs');
 var path = require('path');
-var uniqid = require('uniqid');
 let prettifyXml = require('prettify-xml')
-
-let cache = require('./includes/cache');
 let Template = require('./includes/template');
 
 function Namine(options) {
@@ -30,7 +27,7 @@ function Namine(options) {
   this.options.write_filename = this.options.modification_path +
   this.options.modification_name+'.ocmod.xml';
   this.options.php_filter = new RegExp('//-nmn '+ this.options.modification_name+' pos:"(.*)" line: (.*)[\r\n|\r|\n]([\\s\\S]*?)//-nmn', 'gmu');
-	this.options.html_filter = new RegExp('<!--//-nmn '+ this.options.modification_name+' pos:"(.*)" line: (.*)-->([\\s\\S]*?)<!--//-nmn-->', 'gmu');
+	this.options.html_filter = new RegExp('<!--//-nmn-html '+ this.options.modification_name+' pos:"(.*)" line: (.*)-->([\\s\\S]*?)<!--//-nmn-html-->', 'gmu');
 }
 
 Namine.prototype.getNumberOfModifications = function() {
@@ -71,46 +68,42 @@ Namine.prototype._getModifications = function(options) {
   if (!options.dir) return false;
   if (!options.extension) return false;
 
-  let filter;
-  switch (options.extension) {
-    case 'php':
-      filter = this.options.php_filter;
-      break;
-    case 'tpl':
-      filter = this.options.html_filter;
-      break;
-    case 'twig':
-      filter = this.options.html_filter;
-      break;
-    default:
-      filter = '';
-  }
-  if (filter == '') {
-    console.log('Extension .'+options.extension+' is not supported!');
-    return false;
-  }
-
   let list= fromDir(this.options.modification_path + options.dir + '/','.'+options.extension);
 
   let modifications = {};
 
-  if (list !== undefined)
-    for (var i=0; i<list.length; i++) {
-  			modifications = Object.assign(modifications, (function(filename, _this, filter){
-  				let contents = fs.readFileSync(filename);
-  				let modifications;
-  				let match;
-  				modifications = [];
-  				while ((match = filter.exec(contents)) !== null) {
-  					if (modifications[filename] === undefined) modifications[filename] = [];
-  					modifications[filename].push([ match['index'], match[3], match[1], match[2] ]);
-  				}
-  				return modifications;
-
-  			})(list[i], this, filter) );
-  		}
+	modifications = this._findModificationsByFilter(list, this.options.php_filter, modifications);
+	modifications = this._findModificationsByFilter(list, this.options.html_filter, modifications);
 
   return modifications;
+}
+
+Namine.prototype._findModificationsByFilter = function(list, filter, modifications_obj) {
+	let modifications_obj_temp = modifications_obj;
+	if (list !== undefined)
+		for (var i=0; i<list.length; i++) {
+			let modifications = {};
+			modifications = (function(filename, _this, filter){
+				let contents = fs.readFileSync(filename);
+				let modifications;
+				let match;
+				modifications = [];
+				while ((match = filter.exec(contents)) !== null) {
+					if (modifications[filename] === undefined) modifications[filename] = [];
+					modifications[filename].push([ match['index'], match[3], match[1], match[2] ]);
+				}
+				return modifications;
+			})(list[i], this, filter);
+			if (Object.keys(modifications).length > 0) {
+				let object_values = Object.values(modifications[list[i]]);
+				if (modifications_obj_temp.hasOwnProperty(list[i])) {
+					Array.prototype.push.apply(modifications_obj_temp[list[i]], object_values);
+				} else {
+					modifications_obj_temp[list[i]] = modifications[list[i]];
+				}
+			}
+		}
+  return modifications_obj;
 }
 
 Namine.prototype._getModificationFileContent = function(modifications) {

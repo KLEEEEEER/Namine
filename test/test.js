@@ -10,22 +10,9 @@ var namine = new Namine({
   'version': '0.1',
   'code': 'test_code',
   'modification_path': './test/',
-  'cache_dir': './test/cache/'
 });
 
 namine.makeModification();
-//namine.getNumberOfModifications();
-//namine.writeJsonModification();
-
-// console.log( namine._getTemplatedContent('main', {
-//   'modification_name': 'ass',
-//   'version': 'assversion',
-//   'author': 'assauthor',
-//   'link': 'asslink',
-//   'code': 'asscode',
-// }).toString('utf8') );
-
-//console.log(namine._getAllModifications());
 
 describe('Functions', function() {
     it('Generated xml should be equals to test_expected file', function() {

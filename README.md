@@ -1,142 +1,262 @@
 # Namine
-OpenCart modification parser.
-Made to parse modifications from dev files.
-So for the start you need two versions of your project: dev and work.
 
-In dev you are writing your modifications with certain commentaries.
-Then you starting this script for parse modification from dev files.
-And after that you install your modification on working site as usual modification.
+## Description
+This script was created to make it easier to write OpenCart modifications and initially develop the code for its modifications immediately in the site files. It collects all the pieces of your modifications into a .ocmod.xml file, which you can install on your production site as usual.
 
-## Quick install
+## Initial settings
+
+In order to start working with Namine you need:
+
+1. Expand a copy of your site to develop modifications. This is necessary so as not to modify files directly in the working folders.
+
+2. Install Namine in the root directory of a copy of your development site.
 ```
 npm install namine
 
 ```
+3. Create a file that will run Namine. Create the namine.js file in the root directory with the following contents:
 
-## Syntax examples
-
-Modification for .php files:
 ```
-...
-//-nmn MODIFICATION_NAME pos:"POSITION" line: LINE
-MODIFICATION_TEXT
+var Namine = require('namine');
+
+var namine = new Namine({
+  'modification_name': 'test',
+  'rewrite': true,
+  'author': 'test author',
+  'link': 'test link',
+  'version': '0.1',
+  'code': 'test_code',
+});
+
+namine.makeModification();
+```
+#### New Namine() initialization options
+
+**modification_name** - (string) The name of the modification. Used to search for modifications in files.
+
+**rewrite** - (true|false) Permission to overwrite the .ocmod.xml modification file.
+
+**author** - (string) Name of the author of the modification.
+
+**link** - (string) Link to the modification site or author's site.
+
+**version** - (string) Modification version number.
+
+**code** - (string) Unique modification code. Used for identification in OpenCart.
+
+**directories** - (array) An array for specifying search directories for modifications and search extensions.
+
+> Стандартный массив:
+>```
+>directories: [
+>      {dir: 'catalog', extension: 'php'},
+>      {dir: 'catalog', extension: 'tpl'},
+>      {dir: 'catalog', extension: 'twig'},
+>      {dir: 'admin', extension: 'php'},
+>      {dir: 'admin', extension: 'tpl'},
+>      {dir: 'admin', extension: 'twig'},
+>    ]
+>```
+
+## Writing modifications
+
+In order for Namine to understand where the modifications are in the code, they need to be wrapped in a specific syntax. For certain file extensions, certain syntax is used.
+
+### php
+```
+//-nmn name pos:"before" line: <\?php echo "test php string"; ?\>
+Modification Content
 //-nmn
-...
 ```
+**name** - Modification name
 
-Modification for .tpl and .twig files:
+**before** - Modification position. The position may be:
+* before
+* after
+* replace
+
+[Positions in OpenCart Modifications](https://github.com/opencart/opencart/wiki/Modification-System#add)
+
+**<\\?php echo "test php string"; ?\\>** - The line with which work is being conducted.
+
+> Symbols \<?php, \<? и \?> replacing by <\\?php, <\\? и ?\\> respectively. This is necessary so that the code does not run in the comment once again..
+
+**Modification content** - Content modification (It doesn’t matter plain text or code).
+
+Example:
 ```
-...
-<!--//-nmn MODIFICATION_NAME pos:"POSITION" line: LINE-->
-MODIFICATION_TEXT
-<!--//-nmn-->
-...
+//-nmn test pos:"after" line: <\?php This code will before modification! ?\>
+Content after line
+//-nmn
 ```
-* MODIFICATION_NAME - name of your modification without spaces
-* POSITION - position of modification (after, before, replace)
-* LINE - line after, before or replaced of your modification
-* MODIFICATION_TEXT - just your modification
+A modification called test. “Content after line” will be inserted after the line “<\? Php This code will be before modification! ? \> ”.
 
-### test.js
+### twig and tpl
 
 ```
-var namine = require('namine');
+<!--//-nmn-html name pos:"before" line: <\?php This code will be after modification! ?\>-->
+Content before line
+<!--//-nmn-html-->
+```
+**name** - Modification name
 
-namine.makeModification({
-	name:'hello',
-	author:'test_author',
-	link:'test.com',
-	version:'0.1',
+**before** - Modification position. The position may be:
+* before
+* after
+* replace
+
+[Positions in OpenCart Modifications](https://github.com/opencart/opencart/wiki/Modification-System#add)
+
+**<\\?php This code will be after modification! ?\\>** - The line with which work is being conducted.
+
+> Symbols \<?php, \<? и \?> replacing by <\\?php, <\\? и ?\\> respectively. This is necessary so that the code does not run in the comment once again..
+
+**"Content before line"** - Content modification (It doesn’t matter plain text or code).
+
+Example:
+```
+<!--//-nmn-html name pos:"before" line: <\?php This code will be after modification! ?\>-->
+Content before line
+<!--//-nmn-html-->
+```
+A modification called test. “Content before line” will be inserted before the line “<\? Php This code will be after modification! ? \> ”.
+
+# Complete example of a simple modification
+
+## namine.js
+```
+var Namine = require('namine');
+
+var namine = new Namine({
+  'modification_name': 'my_first_modification',
+  'rewrite': true,
+  'author': 'KLEEEEEER',
+  'link': 'https://github.com/KLEEEEEER',
+  'version': '1.0',
+  'code': 'my_first_modification',
 });
+
+namine.makeModification();
 ```
 
-#### makeModification() options
+## catalog/controller/extension/module/account.php
 
-* name - Name of modification in xml file. Default: 'test'
-* author - Author of modification in xml file. Default: 'Author'
-* link - Custom link of modification in xml file. Default: ''
-* version - Version of modification in xml file. Default: '0.1'
-* code - Code of saving modification file. Default: modification_name default value or set value
-* modification_path - Path of saving modification file. Default: './'
-* rewrite - Allow script to rewrite output file if it's exists. Default: false
+```php
+<?php
+class ControllerExtensionModuleAccount extends Controller {
+	public function index() {
+		$this->load->language('extension/module/account');
 
-## Example
-
-Writing modification in php file:
-
-### catalog/controller/product/product.php
-```
-...
-//-nmn hello pos:"before" line: $product_info = $this->model_catalog_product->getProduct($product_id);
-		$data['hello1'] = 'hello';
-
-		$data['hello2'] = '???';
+		$data['heading_title'] = $this->language->get('heading_title');
+		$data['text_register'] = $this->language->get('text_register');
+		$data['text_login'] = $this->language->get('text_login');
+		//-nmn my_first_modification pos:"after" line: $data['text_login'] = $this->language->get('text_login');
+		$data['my_string'] = 'Test';
 		//-nmn
-		$product_info = $this->model_catalog_product->getProduct($product_id);
-...
+		$data['text_logout'] = $this->language->get('text_logout');
+		$data['text_forgotten'] = $this->language->get('text_forgotten');
+		$data['text_account'] = $this->language->get('text_account');
+		$data['text_edit'] = $this->language->get('text_edit');
+		$data['text_password'] = $this->language->get('text_password');
+		$data['text_address'] = $this->language->get('text_address');
+		$data['text_wishlist'] = $this->language->get('text_wishlist');
+		$data['text_order'] = $this->language->get('text_order');
+		$data['text_download'] = $this->language->get('text_download');
+		$data['text_reward'] = $this->language->get('text_reward');
+		$data['text_return'] = $this->language->get('text_return');
+		$data['text_transaction'] = $this->language->get('text_transaction');
+		$data['text_newsletter'] = $this->language->get('text_newsletter');
+		$data['text_recurring'] = $this->language->get('text_recurring');
+
+		$data['logged'] = $this->customer->isLogged();
+		$data['register'] = $this->url->link('account/register', '', true);
+		$data['login'] = $this->url->link('account/login', '', true);
+		$data['logout'] = $this->url->link('account/logout', '', true);
+		$data['forgotten'] = $this->url->link('account/forgotten', '', true);
+		$data['account'] = $this->url->link('account/account', '', true);
+		$data['edit'] = $this->url->link('account/edit', '', true);
+		$data['password'] = $this->url->link('account/password', '', true);
+		$data['address'] = $this->url->link('account/address', '', true);
+		$data['wishlist'] = $this->url->link('account/wishlist');
+		$data['order'] = $this->url->link('account/order', '', true);
+		$data['download'] = $this->url->link('account/download', '', true);
+		$data['reward'] = $this->url->link('account/reward', '', true);
+		$data['return'] = $this->url->link('account/return', '', true);
+		$data['transaction'] = $this->url->link('account/transaction', '', true);
+		$data['newsletter'] = $this->url->link('account/newsletter', '', true);
+		$data['recurring'] = $this->url->link('account/recurring', '', true);
+
+		return $this->load->view('extension/module/account', $data);
+	}
+}
+
 ```
 
-Writing modification in tpl file:
+## catalog/view/theme/default/template/extension/module/account.tpl
 
-### catalog/view/theme/default/template/product/product.tpl
-```
-...
-<?php if ($review_status) { ?>
-<!--//-nmn hello pos:"after" line: <?php if ($review_status) { ?>-->
-<?php echo $hello . ' ' . $hello2;?>
-<!--//-nmn-->
-...
-```
+```php
+<div class="list-group">
+	<!--//-nmn-html my_first_modification pos:"after" line: <div class="list-group">-->
+	<span><?php echo $my_string; ?></span>
+	<!--//-nmn-html-->
+  <?php if (!$logged) { ?>
+  <a href="<?php echo $login; ?>" class="list-group-item"><?php echo $text_login; ?></a> <a href="<?php echo $register; ?>" class="list-group-item"><?php echo $text_register; ?></a> <a href="<?php echo $forgotten; ?>" class="list-group-item"><?php echo $text_forgotten; ?></a>
+  <?php } ?>
+  <a href="<?php echo $account; ?>" class="list-group-item"><?php echo $text_account; ?></a>
+  <?php if ($logged) { ?>
+  <a href="<?php echo $edit; ?>" class="list-group-item"><?php echo $text_edit; ?></a> <a href="<?php echo $password; ?>" class="list-group-item"><?php echo $text_password; ?></a>
+  <?php } ?>
+  <a href="<?php echo $address; ?>" class="list-group-item"><?php echo $text_address; ?></a> <a href="<?php echo $wishlist; ?>" class="list-group-item"><?php echo $text_wishlist; ?></a> <a href="<?php echo $order; ?>" class="list-group-item"><?php echo $text_order; ?></a> <a href="<?php echo $download; ?>" class="list-group-item"><?php echo $text_download; ?></a><a href="<?php echo $recurring; ?>" class="list-group-item"><?php echo $text_recurring; ?></a> <a href="<?php echo $reward; ?>" class="list-group-item"><?php echo $text_reward; ?></a> <a href="<?php echo $return; ?>" class="list-group-item"><?php echo $text_return; ?></a> <a href="<?php echo $transaction; ?>" class="list-group-item"><?php echo $text_transaction; ?></a> <a href="<?php echo $newsletter; ?>" class="list-group-item"><?php echo $text_newsletter; ?></a>
+  <?php if ($logged) { ?>
+  <a href="<?php echo $logout; ?>" class="list-group-item"><?php echo $text_logout; ?></a>
+  <?php } ?>
+</div>
 
-### test.js
 
-```
-var namine = require('namine');
-
-namine.makeModification({
-	name:'hello',
-	author:'test_author',
-	link:'test.com',
-	version:'0.1',
-});
 ```
 
-Run node script like this:
-```
-node test.js
-```
+After running the script, the output is in my_first_modification.ocmod.xml
 
-Script starting searching for modification and creating modification ocmod file.
+## my_first_modification.ocmod.xml
 
-### output hello.ocmod.xml
-```
+```xml
 <?xml version="1.0" ?>
 <!DOCTYPE modification []>
 <modification>
-	<name>hello</name>
-	<version>0.1</version>
-	<author>test_author</author>
-	<link>test.com</link>
-	<code>hello</code>
-	<file path="catalog/controller/product/product.php">
-		<operation>
-			<search><![CDATA[$product_info = $this->model_catalog_product->getProduct($product_id);]]></search>
-			<add position="before"><![CDATA[
-		$data['hello1'] = 'hello';
-
-		$data['hello2'] = '???';
-		]]></add>
-		</operation>
-	</file>
-
-	<file path="catalog/view/theme/*/template/product/product.tpl">
-		<operation>
-			<search><![CDATA[<?php if ($review_status) { ?>]]></search>
-			<add position="after"><![CDATA[
-	<?php echo $hello1 . ' ' . $hello2;?>
-	]]></add>
-		</operation>
-	</file>
-
+  <name>my_first_modification</name>
+  <version>1.0</version>
+  <author>KLEEEEEER</author>
+  <link>https://github.com/KLEEEEEER</link>
+  <code>my_first_modification</code>
+  <file path="catalog/controller/extension/module/account.php">
+    <operation>
+      <search>
+        <![CDATA[$data['text_login'] = $this->language->get('text_login');]]>
+      </search>
+      <add position="after">
+        <![CDATA[		$data['my_string'] = 'Test';
+        ]]>
+      </add>
+    </operation>
+    
+  </file>
+  <file path="catalog/view/theme/*/template/extension/module/account.tpl">
+    <operation>
+      <search>
+        <![CDATA[<div class="list-group">]]>
+      </search>
+      <add position="after">
+        <![CDATA[
+        <span>
+          <?php echo $my_string; ?>
+        </span>
+        ]]>
+      </add>
+    </operation>
+    
+  </file>
+  
 </modification>
 ```
+
+*"That's a piece of your memory, Sora. Call out to it!"*
