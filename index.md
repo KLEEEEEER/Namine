@@ -10,10 +10,10 @@ In order to start working with Namine you need:
 1. Expand a copy of your site to develop modifications. This is necessary so as not to modify files directly in the working folders.
 
 2. Install Namine in the root directory of a copy of your development site.
-```
+
 npm install namine
 
-```
+
 3. Create a file that will run Namine. Create the namine.js file in the root directory with the following contents:
 
 ```
