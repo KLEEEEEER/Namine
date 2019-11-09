@@ -1,4 +1,0 @@
-<operation>
-  <search><![CDATA[{{search_string}}]]></search>
-    <add position="{{position}}"><![CDATA[{{modification_content}}]]></add>
-</operation>
