@@ -1,2 +1,5 @@
 theme: jekyll-theme-cayman
 show_downloads: true
+github:
+  zip_url: https://github.com/KLEEEEEER/Namine/archive/v1.0.0.zip
+  tar_url: https://github.com/KLEEEEEER/Namine/archive/v1.0.0.tar.gz
